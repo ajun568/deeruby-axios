@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="apiBtn">调用接口</div>
+  <div id="cancelBtn1">取消接口1</div>
+  <div id="cancelBtn2">取消接口2</div>
+  <script src="./dist/index.js"></script>
+  <script>
+    axios.interceptors.request.use(
+      response => {
+        return response
+      },
+      error => {},
+    )
+    axios.default.timeout = 1000
+
+    const CancelToken = axios.CancelToken
+    let source = CancelToken.source()
+    let cancel
+
+    const apiBtn = document.getElementById('apiBtn')
+    apiBtn.onclick = async () => {
+      console.warn('调用api')
+      // const getdata = await axios.get('https://reqres.in/api/users', {
+      //   params: {
+      //     page: 2,
+      //   }
+      // })
+      // console.error('getdata =>', getdata)
+
+      const postdata1 = await axios.post('https://reqres.in/api/users', {
+        data: {
+          name: 'deeruby',
+          job: '学生',
+        },
+        cancelToken: source.token,
+      })
+      console.error('postdata1 =>', postdata1)
+
+      const postdata2 = await axios.post('https://reqres.in/api/users', {
+        data: {
+          name: 'deeruby',
+          job: '学生',
+        },
+        cancelToken: new CancelToken(c => { cancel = c }),
+      })
+      console.error('postdata2 =>', postdata2)
+    }
+
+    const cancelBtn1 = document.getElementById('cancelBtn1')
+    cancelBtn1.onclick = async () => {
+      console.warn('取消api1')
+      source.cancel('这里取消post请求1')
+      source = axios.CancelToken.source()
+    }
+
+    const cancelBtn2 = document.getElementById('cancelBtn2')
+    cancelBtn2.onclick = async () => {
+      console.warn('取消api2')
+      if (cancel) cancel('这里取消post请求2')
+    }
+  </script>
+</body>
+</html>
